@@ -1,4 +1,6 @@
-MATLAB code for statistical analysis with continuous observations of bi-dimensional reversible diffusions..
+# Rev-Diff
+
+MATLAB code for statistical analysis with continuous observations of bi-dimensional reversible diffusions.
 
 Authors: Matteo Giordano, https://matteogiordano.weebly.com, and Kolyan Ray, https://kolyanray.wordpress.com.
 
