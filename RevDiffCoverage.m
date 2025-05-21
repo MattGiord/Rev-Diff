@@ -1,5 +1,33 @@
+% Copyright (c) 2025 Matteo Giordano and Kolyan Ray
+%
+% Codes accompanying the article "Semiparametric Bernstein-von Mises theorems 
+% for reversible diffusions" 
+% by Matteo Giordano andn Kolyan Ray
+
 %%
-% Specify the domain and create the mesh
+% Contents:
+%
+% 1. Continuously-observed bidimensional reversible diffusion with periodic
+%    gradient drift vector field
+%
+%   1.1 Domain and ground truth
+%   1.2 Continuous diffusion path
+%
+% 2. Coverage experiments for semiparametric posterior inference on functionals
+%    with a truncated Gaussian series prior
+%
+% Requires auxiliary functions CosCos.m, CosSin.m, SinCos.m, SinSin.m, 
+% GradCosCos.m, GradCosSin.m, GradSinCos.m and GradSinSin.m, 
+
+%%
+% 1. Continuously-observed bidimensional reversible diffusion with periodic
+%    gradient drift vector field
+
+%%
+%   1.1 Domain and ground truth
+
+%%
+% Specify the domain and create mesh for function discretisation and plots
 
 % Display more digits
 %format long
@@ -61,9 +89,9 @@ end
 % Specify B_0 and its gradient as functions of (x,y)
 
 %Ground truth 1
-%B0 = @(x,y) exp(-(7.5*x-5).^2-(7.5*y-5).^2)+exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2);
-%GradB0 = @(x,y) -2*exp(-(7.5*x-5).^2-(7.5*y-5).^2)*[7.5*(7.5*x-5),7.5*(7.5*y-5)]...
-%    -2*exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2)*[7.5*(7.5*x-2.5),7.5*(7.5*y-2.5)];
+B0 = @(x,y) exp(-(7.5*x-5).^2-(7.5*y-5).^2)+exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2);
+GradB0 = @(x,y) -2*exp(-(7.5*x-5).^2-(7.5*y-5).^2)*[7.5*(7.5*x-5),7.5*(7.5*y-5)]...
+    -2*exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2)*[7.5*(7.5*x-2.5),7.5*(7.5*y-2.5)];
 
 %Ground truth 2
 %B0 = @(x,y) 2+exp(-(7.5*x-5).^2-(7.5*y-5).^2)-exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2);
@@ -71,14 +99,14 @@ end
 %    +2*exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2)*[7.5*(7.5*x-2.5),7.5*(7.5*y-2.5)];
 
 %Ground truth 3
-B0 = @(x,y) exp(-(7.5*x-5.5).^2-(7.5*y-5.5).^2)...
-    +.75*exp(-(5*x-1.25).^2-(7.5*y-5.5).^2)...
-    +1.25*exp(-(7.5*x-5.5).^2-(5*y-1.25).^2)...
-    +exp(-(7.5*x-2).^2-(7.5*y-2).^2);
-GradB0 = @(x,y) -2*exp(-(7.5*x-5.5).^2-(7.5*y-5.5).^2)*[7.5*(7.5*x-5.5),7.5*(7.5*y-5.5)]...
-    -2*.75*exp(-(5*x-1.25).^2-(7.5*y-5.5).^2)*[5*(5*x-1.25),7.5*(7.5*y-5.5)]...
-    -2*1.25*exp(-(7.5*x-5.5).^2-(5*y-1.25).^2)*[7.5*(7.5*x-5.5),5*(5*y-1.25)]...
-    -2*exp(-(7.5*x-2).^2-(7.5*y-2).^2)*[7.5*(7.5*x-2),7.5*(7.5*y-2)];
+%B0 = @(x,y) exp(-(7.5*x-5.5).^2-(7.5*y-5.5).^2)...
+%    +.75*exp(-(5*x-1.25).^2-(7.5*y-5.5).^2)...
+%    +1.25*exp(-(7.5*x-5.5).^2-(5*y-1.25).^2)...
+%    +exp(-(7.5*x-2).^2-(7.5*y-2).^2);
+%GradB0 = @(x,y) -2*exp(-(7.5*x-5.5).^2-(7.5*y-5.5).^2)*[7.5*(7.5*x-5.5),7.5*(7.5*y-5.5)]...
+%    -2*.75*exp(-(5*x-1.25).^2-(7.5*y-5.5).^2)*[5*(5*x-1.25),7.5*(7.5*y-5.5)]...
+%    -2*1.25*exp(-(7.5*x-5.5).^2-(5*y-1.25).^2)*[7.5*(7.5*x-5.5),5*(5*y-1.25)]...
+%    -2*exp(-(7.5*x-2).^2-(7.5*y-2).^2)*[7.5*(7.5*x-2),7.5*(7.5*y-2)];
 
 B0_bary=B0(barycenters(1,:),barycenters(2,:));
 B0_norm = sqrt(sum(B0_bary.^2.*mesh_elements_area));
@@ -107,9 +135,8 @@ xlabel('x', 'FontSize', 20);
 ylabel('y', 'FontSize', 20);
 crameri vik
 
-
 %%
-% 2. Projection of B_0 onto the Fourier
+% Projection of B_0 onto the Fourier basis
 
 % Specify truncation level
 M=4;
@@ -175,7 +202,7 @@ for m=0:M
     end
 end
 
-% Plot B_0, its projection and the approximation error
+% Plot B_0 and its projection
 figure()
 subplot(1,2,1)
 pdeplot(model,'XYData',real(B0_mesh),'ColorMap',jet)
@@ -199,7 +226,8 @@ disp(['L^2 approximation error via projection = ', num2str(approx_error)])
 disp(['Relative error = ', num2str(approx_error/B0_norm)])
 
 %%
-% Repeated experiments to evaluate coverage for functionals
+% 2. Coverage experiments for semiparametric posterior inference on functionals
+%    with a truncated Gaussian series prior
 
 % Square functional
 true_square_functional = sum((B0_bary.^2).*mesh_elements_area);
@@ -208,7 +236,7 @@ coverage_square = 0;
 q=4;
 true_power_functional = sum((B0_bary.^4).*mesh_elements_area);
 coverage_power = 0;
-% Entrpy of invariant measure functional
+% Entropy of invariant measure functional
 mu0_bary=exp(B0_bary);
 mu0_int = sum(mu0_bary.*mesh_elements_area);
 mu0_bary = mu0_bary/mu0_int;
@@ -216,7 +244,7 @@ true_entropy_functional = sum(mu0_bary.*log(mu0_bary).*mesh_elements_area);
 coverage_entropy = 0;
 
 % Posterior draws to approximate one dimensional posteriors
-post_draws_num = 1000;
+post_draws_num = 2500;
 post_draws_square_functional = zeros(1,post_draws_num);
 post_draws_power_functional = zeros(1,post_draws_num);
 post_draws_entropy_functional = zeros(1,post_draws_num);
@@ -240,7 +268,7 @@ X = zeros(2,sim_len);
     % initialisation of the trajectory
 
 % Number of repeated experiments
-n_exp=50;
+n_exp=25;
 errors_square = zeros(1,n_exp);
 errors_power = zeros(1,n_exp);
 errors_entropy = zeros(1,n_exp);
@@ -291,19 +319,6 @@ for s=1:n_exp
         X(:,i) = X(:,i-1) - GradB0(X_prec_proj(1),X_prec_proj(2))'*deltaT...
             + sigma*mvnrnd(zeros(2,1),deltaT*eye(2))';
     end
-
-    % Compute covariance matrix
-    %Sigma=ones((M+1)^2,(M+1)^2);
-        % initialises the matrix Sigma in the posterior covariance formula
-
-    %xderiv_cc=ones((M+1)^2,sim_len+1);
-    %yderiv_cc=ones((M+1)^2,sim_len+1);
-    %xderiv_cs=ones((M+1)^2,sim_len+1);
-    %yderiv_cs=ones((M+1)^2,sim_len+1);
-    %xderiv_sc=ones((M+1)^2,sim_len+1);
-    %yderiv_sc=ones((M+1)^2,sim_len+1);
-    %xderiv_ss=ones((M+1)^2,sim_len+1);
-    %yderiv_ss=ones((M+1)^2,sim_len+1);
 
     for m=0:M
         for n=0:M
@@ -406,9 +421,6 @@ for s=1:n_exp
 
     % Compute posterior mean
     X_diff=X(:,2:sim_len)-X(:,1:sim_len-1);
-    %H=ones((M+1)^2,1);
-        % initialises vector H for computation of posterior mean
-
     for i=1:(M+1)^2
         H(i)=sum(xderiv_cc(i,1:sim_len-1).*X_diff(1,:))...
         +sum(yderiv_cc(i,1:sim_len-1).*X_diff(2,:));
@@ -422,7 +434,6 @@ for s=1:n_exp
         H(3*(M+1)^2+i)=sum(xderiv_ss(i,1:sim_len-1).*X_diff(1,:))...
         +sum(yderiv_ss(i,1:sim_len-1).*X_diff(2,:));
     end
-
     post_mean=post_cov*H;
 
     % Posterior mean as a function
@@ -470,18 +481,6 @@ for s=1:n_exp
                 post_draw_ss_matr(m+1,n+1)=post_draw(3*(M+1)^2+(M+1)*m+(n+1));
             end
         end
-        %B_draw_mesh=zeros(1,mesh_nodes_num);
-        %for m=0:M
-        %    for n=0:M
-        %        B_draw_mesh = B_draw_mesh...
-        %            +post_draw_cc_matr(m+1,n+1)*CosCos(m,n,mesh_nodes(1,:),mesh_nodes(2,:))...
-        %            +post_draw_cs_matr(m+1,n+1)*CosSin(m,n,mesh_nodes(1,:),mesh_nodes(2,:))...
-        %            +post_draw_sc_matr(m+1,n+1)*SinCos(m,n,mesh_nodes(1,:),mesh_nodes(2,:))...
-        %            +post_draw_ss_matr(m+1,n+1)*SinSin(m,n,mesh_nodes(1,:),mesh_nodes(2,:));
-        %    end
-        %end
-        %B_draw_bary = griddata(mesh_nodes(1,:),mesh_nodes(2,:),B_draw_mesh,...
-        %barycenters(1,:),barycenters(2,:));
         B_draw_bary=zeros(1,mesh_elements_num);
         for m=0:M
             for n=0:M

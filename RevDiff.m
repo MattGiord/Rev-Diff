@@ -1,5 +1,55 @@
+% Copyright (c) 2025 Matteo Giordano and Kolyan Ray
+%
+% Codes accompanying the article "Semiparametric Bernstein-von Mises theorems 
+% for reversible diffusions" 
+% by Matteo Giordano andn Kolyan Ray
+
 %%
-% Specify the domain and create the mesh
+% Contents:
+%
+% 1. Continuously-observed bidimensional reversible diffusion with periodic
+%    gradient drift vector field
+%
+%   1.1 Domain and ground truth
+%   1.2 Continuous diffusion path
+%
+% 2. Posterior inference on B and Psi(B) with a truncated Gaussian series
+%    prior
+%
+%   2.1 Computation of the posterior covariance matrix
+%   2.2 Computation of the posterior mean
+%   2.3 Monte Carlo approximation of the plug-in posterior distributions
+%
+% Requires auxiliary functions CosCos.m, CosSin.m, SinCos.m, SinSin.m, 
+% GradCosCos.m, GradCosSin.m, GradSinCos.m and GradSinSin.m, 
+
+%%
+% 1. Continuously-observed bidimensional reversible diffusion with periodic
+%    gradient drift vector field
+%
+% Let X=(X_t, t>=0) be the bi-dimensional Markov diffusion process arising as the
+% solution of the SDE
+%
+%   dX_t = grad[B](X_t)dt +  dW_t,  
+%   X_0  = x_0,
+%
+% where B:R^2 -> R is the unknown (sufficiently smooth) 1-periodic potential 
+% energy field and (W_t, t >= 0) is a standard Brownian motion in R^2.
+%
+% We observe a continuous trajectory of X up to time horizon T>0, X^T =
+% (X_t, 0<=t<=T), and consider the problem of estimating B and one-dimensional
+% functionals Psi(B) of B, based on X^T.
+%
+% The following code generates the observations X^T, implements Bayesian
+% nonparametric inference for B based on a truncated Gaussian series prior
+% defined on the Fourier basis, and obtains the Monte Carlo approximations
+% of the plug-in posteriors for Psi(B).
+
+%%
+%   1.1 Domain and ground truth
+
+%%
+% Specify the domain and create mesh for function discretisation and plots
 
 % Display more digits
 %format long
@@ -58,12 +108,12 @@ end
 %%
 % Specify periodic potential
 
-% Specify B_0 and its gradient as functions of (x,y)
-
 %Ground truth 1
 B0 = @(x,y) exp(-(7.5*x-5).^2-(7.5*y-5).^2)+exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2);
 GradB0 = @(x,y) -2*exp(-(7.5*x-5).^2-(7.5*y-5).^2)*[7.5*(7.5*x-5),7.5*(7.5*y-5)]...
     -2*exp(-(7.5*x-2.5).^2-(7.5*y-2.5).^2)*[7.5*(7.5*x-2.5),7.5*(7.5*y-2.5)];
+
+% Plot periodic potential energy field (B1 only)
 %B0_per = @(x,y) exp(-(7.5*mod(abs(x),1)-5).^2-(7.5*mod(abs(y),1)-5).^2)+exp(-(7.5*mod(abs(x),1)-2.5).^2-(7.5*mod(abs(y),1)-2.5).^2);
 %xderivB0 = @(x,y) -2.*exp(-(7.5*mod(abs(x),1)-5).^2-(7.5*mod(abs(y),1)-5).^2)*7.5.*(7.5*mod(abs(x),1)-5)...
 %    -2*exp(-(7.5*mod(abs(x),1)-2.5).^2-(7.5*mod(abs(y),1)-2.5).^2)*7.5.*(7.5*mod(abs(x),1)-2.5);
@@ -73,8 +123,6 @@ GradB0 = @(x,y) -2*exp(-(7.5*x-5).^2-(7.5*y-5).^2)*[7.5*(7.5*x-5),7.5*(7.5*y-5)]
 %B0_grid=B0_per(xx,yy);
 %xderivB0_grid = xderivB0(xx,yy);
 %yderivB0_grid = yderivB0(xx,yy);
-
-% Plot periodic potential energy field (B1 only)
 %figure()
 %axes('FontSize', 20, 'NextPlot','add')
 %surf(xx,yy,B0_grid,'EdgeColor', 'none')
@@ -86,7 +134,6 @@ GradB0 = @(x,y) -2*exp(-(7.5*x-5).^2-(7.5*y-5).^2)*[7.5*(7.5*x-5),7.5*(7.5*y-5)]
 %xlabel('x', 'FontSize', 20);
 %ylabel('y', 'FontSize', 20);
 %crameri vik
-
 % Plot gradient vector field (B1 only)
 %figure()
 %axes('FontSize', 20, 'NextPlot','add')
@@ -141,7 +188,7 @@ ylabel('y', 'FontSize', 20);
 crameri vik
 
 %%
-% 2. Projection of B_0 onto the Fourier
+% Projection of B_0 onto the Fourier basis
 
 % Specify truncation level
 M=4;
@@ -207,7 +254,7 @@ for m=0:M
     end
 end
 
-% Plot B_0, its projection and the approximation error
+% Plot B_0 and its projection
 figure()
 subplot(1,2,1)
 pdeplot(model,'XYData',real(B0_mesh),'ColorMap',jet)
@@ -231,6 +278,9 @@ disp(['L^2 approximation error via projection = ', num2str(approx_error)])
 disp(['Relative error = ', num2str(approx_error/B0_norm)])
 
 %%
+%   1.2 Continuous diffusion path
+
+%%
 % Sample path simulation
 
 rng(400)
@@ -238,7 +288,7 @@ rng(400)
 % Generate Euler Euler–Maruyama approximations
 sigma = 1; 
     % standard deviation of Brownian motion
-sim_len = 500000; 
+sim_len = 1000000; 
     % number of simulated values
 deltaT = .0001;
     % small time interval between Euler-Maruyama iterates
@@ -301,9 +351,13 @@ ylabel('y', 'FontSize', 20);
 %legend('X_t','X_0','X_T','\nabla B','Fontsize',20)
 
 %%
-% Computation of posterior covariance matrix
+% 2. Posterior inference on B and Psi(B) with a truncated Gaussian series
+%    prior
 
-% Initialise matrixes to store the trajectories of the basis function
+%%
+% 2.1 Computation of the posterior covariance matrix
+
+% Initialise matrices to store the trajectories of the basis function
 % gradients along the diffusion path
 xderiv_cc=ones((M+1)^2,sim_len+1);
     % first (M+1) rows are zero becuase the x-derivative is
@@ -321,11 +375,8 @@ yderiv_sc=ones((M+1)^2,sim_len+1);
 xderiv_ss=ones((M+1)^2,sim_len+1);
 yderiv_ss=ones((M+1)^2,sim_len+1);
 
-tic
-
 for m=0:M
     for n=0:M
-        %(M+1)*m+(n+1)
         grad=GradCosCos(m,n,X(1,:),X(2,:));
         xderiv_cc((M+1)*m+(n+1),:)=grad(1,:);
         yderiv_cc((M+1)*m+(n+1),:)=grad(2,:);
@@ -346,7 +397,7 @@ end
 
 % Compute matrix Sigma in posterior covariace formula
 Sigma=ones(4*(M+1)^2,4*(M+1)^2);
-    % use ones() to check that every entry is overwritten
+
 for i=1:(M+1)^2
     for j=1:(M+1)^2
 
@@ -435,14 +486,8 @@ post_cov=inv(inv(prior_cov)+Sigma);
 post_cov(1,1)=0;
     % corrects for non-identifiability of constants
 
-toc
-    % 1 second for param_num = 36 (M=2), sim_len=10^5
-    % 4 seconds for param_num = 64 (M=3), sim_len=10^5
-    % 10 seconds for param_num = 36, sim_len=10^6
-    % 28 seconds for param_num = 36, sim_len=2.5*10^6
-
 %%
-% Computation of posterior mean
+% 2.2 Computation of the posterior mean
 
 X_diff=X(:,2:sim_len)-X(:,1:sim_len-1);
     % vector of diffusion increments to compute stochastic integral
@@ -514,7 +559,7 @@ pdeplot(model,'XYData',B0_mean_mesh,'ColorMap',jet)
 axis equal
 clim([min(B0_mesh),max(B0_mesh)])
 colorbar('Fontsize',20)
-%title(['Posterior mean estimate, T = ', num2str(T)],'FontSize',20);
+title(['Posterior mean estimate, T = ', num2str(T)],'FontSize',20);
 xticks([-1,-.5,0,.5,1])
 yticks([-1,-.5,0,.5,1])
 xlabel('x', 'FontSize', 20);
@@ -543,8 +588,8 @@ disp(['L^2 estimation error = ', num2str(estim_error)])
 disp(['Relative estimation error= ', num2str(estim_error/B0_norm)])
 disp(['Relative approximation error via projection = ', num2str(approx_error/B0_norm)])%%
 
-%% 
-% Posterior draws for functionals
+%%
+%   2.3 Monte Carlo approximation of the plug-in posterior distributions
 
 rng(1)
 
@@ -582,34 +627,6 @@ for j=1:post_draws_num
         end
     end
     
-    % Plot posterior draw
-    %B_draw_mesh=zeros(1,mesh_nodes_num);
-    %for m=0:M
-    %    for n=0:M
-    %        B_draw_mesh = B_draw_mesh...
-    %            +post_draw_cc_matr(m+1,n+1)*CosCos(m,n,mesh_nodes(1,:),mesh_nodes(2,:))...
-    %            +post_draw_cs_matr(m+1,n+1)*CosSin(m,n,mesh_nodes(1,:),mesh_nodes(2,:))...
-    %            +post_draw_sc_matr(m+1,n+1)*SinCos(m,n,mesh_nodes(1,:),mesh_nodes(2,:))...
-    %            +post_draw_ss_matr(m+1,n+1)*SinSin(m,n,mesh_nodes(1,:),mesh_nodes(2,:));
-    %    end
-    %end
-    %figure()
-    %axes('FontSize', 20, 'NextPlot','add')
-    %pdeplot(model,'XYData',B_draw_mesh,'ColorMap',jet)
-    %axis equal
-    %clim([min(B0_mesh),max(B0_mesh)])
-    %colorbar('Fontsize',20)
-    %title(['Posterior draw, T = ', num2str(T)],'FontSize',20);
-    %xticks([-1,-.5,0,.5,1])
-    %yticks([-1,-.5,0,.5,1])
-    %xlabel('x', 'FontSize', 20);
-    %ylabel('y', 'FontSize', 20);
-    %crameri vik
-    %B_draw_bary = griddata(mesh_nodes(1,:),mesh_nodes(2,:),B_draw_mesh,...
-    %barycenters(1,:),barycenters(2,:));
-    %estim_error = sqrt(sum((B0_bary-sum(B0_bary.*mesh_elements_area)*ones(1,mesh_elements_num)-B_draw_bary).^2.*mesh_elements_area));
-    %disp(['L^2 estimation error = ', num2str(estim_error)])
-
     B_draw_bary=zeros(1,mesh_elements_num);
     for m=0:M
         for n=0:M
@@ -634,7 +651,6 @@ for j=1:post_draws_num
 end
 
 %%
-
 figure()
 axes('FontSize', 20, 'NextPlot','add')
 histogram(post_draws_square_functional, 'Normalization', 'pdf')
@@ -642,6 +658,7 @@ xline(true_square_functional,'r','LineWidth',2)
 xline(quantile(post_draws_square_functional,0.025),'b','LineWidth',2)
 xline(quantile(post_draws_square_functional,0.975),'b','LineWidth',2)
 xline(true_square_functional,'r','LineWidth',2)
+title('\Psi(B) = \int_{[0,1]^d} B^2(x)dx')
 hold on
 xx= linspace(0.02, 0.1, 1000);
 plot(xx, normpdf(xx, mean(post_draws_square_functional),std(post_draws_square_functional)),'green','LineWidth', 2)
@@ -653,6 +670,7 @@ histogram(post_draws_power_functional, 'Normalization', 'pdf')
 xline(true_power_functional,'r','LineWidth',2)
 xline(quantile(post_draws_power_functional,0.025),'b','LineWidth',2)
 xline(quantile(post_draws_power_functional,0.975),'b','LineWidth',2)
+title('\Psi(B) = \int_{[0,1]^d} B^4(x)dx')
 hold on
 xx= linspace(0, 0.05, 1000);
 plot(xx, normpdf(xx, mean(post_draws_power_functional),std(post_draws_power_functional)),'green','LineWidth', 2)
@@ -664,6 +682,7 @@ histogram(post_draws_entropy_functional,'Normalization', 'pdf')
 xline(true_entropy,'r','LineWidth',2)
 xline(quantile(post_draws_entropy_functional,0.025),'b','LineWidth',2)
 xline(quantile(post_draws_entropy_functional,0.975),'b','LineWidth',2)
+title('\Psi(B) = \int_{[0,1]^d} log [\mu_B(x)] \mu_B(x) dx')
 hold on
 xx= linspace(0.015, 0.07, 1000);
 plot(xx, normpdf(xx, mean(post_draws_entropy_functional),std(post_draws_entropy_functional)),'green','LineWidth', 2)
