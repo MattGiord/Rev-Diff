@@ -27,4 +27,4 @@ This repository contains the MATLAB code to replicate the numerical simulation s
 
 For questions or for reporting bugs, please e-mail Matteo Giordano (matteo.giordano@unito.it).
 
-Please cite the following article if you use this repository in your research: Giordano, M., and Ray, S. (2025). Semiparametric Bernstein-von Mises theorems for reversible diffusions.
+Please cite the following article if you use this repository in your research: Giordano, M., and Ray, S. (2026). Semiparametric Bernstein-von Mises theorems for reversible diffusions.
