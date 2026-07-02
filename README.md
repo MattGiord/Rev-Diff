@@ -15,15 +15,16 @@ Our theoretical results are illustrated via numerical simulations."
 This repository contains the MATLAB code to replicate the numerical simulation study presented in the article. It contains the following:
 
 1. RevDiff.m, code to generate the observations and perform Bayesian nonparametric and semiparametric inference using a truncated Gaussian series prior.
-2. RevDiffCoverage.m, code to perform the coverage study via repeated experiments.
-3. CosCos.m, auxiliary function for the Fourier basis.
-4. CosSin.m, auxiliary function for the Fourier basis.
-5. SinCos.m, auxiliary function for the Fourier basis.
-6. SinSin.m, auxiliary function for the Fourier basis.
-7. GradCosCos.m, auxiliary function for the Fourier basis.
-8. GradCosSin.m, auxiliary function for the Fourier basis.
-9. GradSinCos.m, auxiliary function for the Fourier basis.
-10. GradSinSin.m, auxiliary function for the Fourier basis.
+2. RevDiffLapl.m, code to generate the observations and perform Bayesian nonparametric and semiparametric inference using a truncated Besov-Laplace series prior via the whitened preconditioned Cranck-Nicolson algorithm.
+3. RevDiffCoverage.m, code to perform the coverage study via repeated experiments.
+4. CosCos.m, auxiliary function for the Fourier basis.
+5. CosSin.m, auxiliary function for the Fourier basis.
+6. SinCos.m, auxiliary function for the Fourier basis.
+7. SinSin.m, auxiliary function for the Fourier basis.
+8. GradCosCos.m, auxiliary function for the Fourier basis.
+9. GradCosSin.m, auxiliary function for the Fourier basis.
+10. GradSinCos.m, auxiliary function for the Fourier basis.
+11. GradSinSin.m, auxiliary function for the Fourier basis.
 
 For questions or for reporting bugs, please e-mail Matteo Giordano (matteo.giordano@unito.it).
 
